@@ -12,7 +12,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TaskService {
@@ -27,15 +26,6 @@ public class TaskService {
     public List<TaskResponse>  getTasks(){
         return mapper.toTaskResponseList(repository.findAll());
     }
-
-
-//    public TaskResponse getTask(Long id){
-//        Optional<Task> task = repository.findById(id);
-//        if (task.isEmpty()) {
-//            throw new TaskNotFoundException(id);
-//        }
-//        return mapper.toTaskResponse(task.get());
-//    }
 
     public TaskResponse getTask(Long id){
 
@@ -73,17 +63,6 @@ public class TaskService {
 
         Task updatedTask = repository.save(existingTask);
         return mapper.toTaskResponse(updatedTask);
-
-//        if(repository.findById(id).isEmpty()){
-//            throw new TaskNotFoundException(id,"Unable to update!");
-//        }
-//        Task task = mapper.toTask(request);
-//        Optional<Task> taskWithTitle = repository.findByTitle(task.getTitle());
-//        if(taskWithTitle.isPresent()  && !taskWithTitle.get().getId().equals(id)){
-//            throw new DuplicateTaskException("Task with title '"+task.getTitle()+"' already exists!");
-//        }
-//        Task updatedTask = repository.update(id,task).orElseThrow(() -> new TaskNotFoundException(id, "Unable to update!"));
-//        return mapper.toTaskResponse(updatedTask);
     }
 
 
