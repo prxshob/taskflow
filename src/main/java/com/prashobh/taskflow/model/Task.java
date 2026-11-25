@@ -1,12 +1,22 @@
 package com.prashobh.taskflow.model;
 
-import java.time.Instant;
+import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.Instant;
+@Entity
+@Table(name = "tasks")
 public class Task {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(nullable = false,length = 255)
     private String title;
+    @Column(nullable = false)
     private boolean completed;
-    private Instant createdAt = Instant.now();
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private Instant createdAt;
 
     public Task() {
 

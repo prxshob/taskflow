@@ -32,7 +32,7 @@ public class TaskServiceTest {
     private TaskService taskService;
 
     @Test
-    void sucessfullyGetTasks(){
+    void sucessfullyGetsTasks(){
         List<Task> tasks = new ArrayList<>();
         Task task1 = new Task(99L,"Learn SpringBoot",true);
         Task task2 = new Task(98L,"Learn JUnit",true);
@@ -221,39 +221,7 @@ public class TaskServiceTest {
         assertEquals("Unable to update! Task 99 doesn't exist",exception.getMessage());
         verify(repository).findById(99L);
         verify(mapper, never()).toTask(request);
-        verify(repository,never()).update(eq(99L),any(Task.class));
         verify(mapper,never()).toTaskResponse(any(Task.class));
-    }
-
-    @Test
-    void throwsFallbackTaskNotFoundExceptionWhenUpdating(){
-        //arrange
-        TaskUpdateRequest request = new TaskUpdateRequest();
-        request.setTitle("Learn Mockito");
-        request.setCompleted(false);
-        Task existingTask = new Task();
-        existingTask.setId(99L);
-        existingTask.setTitle("Learn Junit");
-        existingTask.setCompleted(false);
-        Task updateTask = new Task();
-        updateTask.setId(99L);
-        updateTask.setTitle("Learn Mockito");
-        updateTask.setCompleted(false);
-
-        when(repository.findById(99L)).thenReturn(Optional.of(existingTask));
-        when(mapper.toTask(request)).thenReturn(updateTask);
-        when(repository.findByTitle(updateTask.getTitle())).thenReturn(Optional.empty());
-        when(repository.update(99L,updateTask)).thenReturn(Optional.empty());
-
-        //Act
-        TaskNotFoundException exception =assertThrows(TaskNotFoundException.class,()->taskService.updateTask(99L,request));
-        assertEquals("Unable to update! Task 99 doesn't exist",exception.getMessage());
-        verify(repository).findById(99L);
-        verify(mapper).toTask(request);
-        verify(repository).findByTitle(updateTask.getTitle());
-        verify(repository).update(99L,updateTask);
-        verify(mapper,never()).toTaskResponse(any(Task.class));
-
     }
 
     @Test
@@ -284,7 +252,6 @@ public class TaskServiceTest {
         verify(repository).findById(99L);
         verify(mapper).toTask(request);
         verify(repository).findByTitle(updateTask.getTitle());
-        verify(repository,never()).update(eq(99L),any(Task.class));
         verify(mapper,never()).toTaskResponse(any(Task.class));
     }
 
@@ -314,7 +281,7 @@ public class TaskServiceTest {
         when(repository.findById(99L)).thenReturn(Optional.of(existingTask));
         when(mapper.toTask(request)).thenReturn(updateTask);
         when(repository.findByTitle(updateTask.getTitle())).thenReturn(Optional.empty());
-        when(repository.update(99L,updateTask)).thenReturn(Optional.of(updatedTask));
+        when(repository.save(existingTask)).thenReturn(updatedTask);
         when(mapper.toTaskResponse(updatedTask)).thenReturn(response);
 
         //Act
@@ -325,10 +292,12 @@ public class TaskServiceTest {
         assertEquals(99L,returnResponse.getId());
         assertEquals("Learn Mockito",returnResponse.getTitle());
         assertFalse(returnResponse.isCompleted());
+        assertEquals("Learn Mockito", existingTask.getTitle());
+        assertFalse(existingTask.isCompleted());
         verify(repository).findById(99L);
         verify(mapper).toTask(request);
         verify(repository).findByTitle(updateTask.getTitle());
-        verify(repository).update(eq(99L),any(Task.class));
+        verify(repository).save(any(Task.class));
         verify(mapper).toTaskResponse(any(Task.class));
     }
 
@@ -358,7 +327,7 @@ public class TaskServiceTest {
         when(repository.findById(99L)).thenReturn(Optional.of(existingTask));
         when(mapper.toTask(request)).thenReturn(updateTask);
         when(repository.findByTitle(updateTask.getTitle())).thenReturn(Optional.of(existingTask));
-        when(repository.update(99L,updateTask)).thenReturn(Optional.of(updatedTask));
+        when(repository.save(existingTask)).thenReturn(updatedTask);
         when(mapper.toTaskResponse(updatedTask)).thenReturn(response);
 
         //Act
@@ -372,22 +341,25 @@ public class TaskServiceTest {
         verify(repository).findById(99L);
         verify(mapper).toTask(request);
         verify(repository).findByTitle(updateTask.getTitle());
-        verify(repository).update(eq(99L),any(Task.class));
+        verify(repository).save(any(Task.class));
         verify(mapper).toTaskResponse(any(Task.class));
     }
 
     @Test
     void successfullyDeletesTask(){
-        when(repository.deleteById(99L)).thenReturn(true);
+        when(repository.existsById(99L)).thenReturn(true);
         taskService.deleteTask(99L);
+
+        verify(repository).existsById(99L);
         verify(repository).deleteById(99L);
     }
 
     @Test
     void throwsTaskNotFoundExceptionWhenDeleting(){
-        when(repository.deleteById(99L)).thenReturn(false);
+        when(repository.existsById(99L)).thenReturn(false);
         TaskNotFoundException exception = assertThrows(TaskNotFoundException.class,()->taskService.deleteTask(99L));
         assertEquals("Unable to delete! Task 99 doesn't exist", exception.getMessage());
-        verify(repository).deleteById(99L);
+        verify(repository).existsById(99L);
+        verify(repository, never()).deleteById(99L);
     }
 }
