@@ -48,6 +48,10 @@ taskflow/
 │   │   ├── mapper/
 │   │   │   └── TaskMapper.java
 │   │   └── TaskFlowApplication
+│   │
+│   ├── main/db/migration/
+│   │   └── V1__create_tasks_table.sql
+│   │
 │   └── test/
 │       │
 │       com.prashobh.taskflow/
